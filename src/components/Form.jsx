@@ -1,23 +1,84 @@
 //rafce
 
 import { useState, useEffect } from "react"
+import Error from "./Error"
 
 
-const Form = () => {
+
+const Form = ({patients,setPatients, patient, setPatient}) => {
   const [patientName,setPatientName] = useState('')
   const [guardianName,setGuardianName] = useState('')
   const [email,setEmail] = useState('')
   const [date,setDate] = useState('')
   const [symptoms,setSymptoms] = useState('')
+
+  const [error,setError] = useState(false)
+
+  useEffect(() => {
+    if(Object.keys(patient).length>0) {
+        setPatientName(patient.patientName)
+        setGuardianName(patient.guardianName)
+        setEmail(patient.email)
+        setDate(patient.date)
+        setSymptoms(patient.symptoms)
+    }
+  }, [patient])
   
+  const generateId = () => {
+      const random = Math.random().toString(36).substr(2)
+      const date = Date.now().toString(36)
+
+      return random + date
+  }
+
   const handleSubmit = (e) => {
       e.preventDefault()
       //Validation
       if([patientName,guardianName,email,date,symptoms].includes('')) {
           console.log('At least one input is empty')
-      } else {
-          console.log("All good")
+          setError(true)
+          return;
+      } 
+
+      // We need to setError back to false if user fills all inputs after an error alert
+
+      setError(false)
+
+      //We need to create an object with all the patient data
+
+      const patientObject = {
+        patientName,
+        guardianName,
+        email,
+        date,
+        symptoms
       }
+
+      
+
+      if(patient.id) {
+          //updating
+          patientObject.id = patient.id
+          const updatedPatients = patients.map(patientState => patientState.id === patient.id ? patientObject : patientState)
+
+          setPatients(updatedPatients)
+          setPatient({}) //this line cleans patient AND now the button updates to "Add patient" again! witchcraft!
+      } else { 
+          //creating
+
+          //Takes the existing information and adds the new patient
+          patientObject.id = generateId()
+          setPatients([...patients,patientObject])
+
+      }
+
+      //Reset the form once everything is done
+
+      setPatientName('')
+      setGuardianName('')
+      setEmail('')
+      setDate('')
+      setSymptoms('')
   }
   
   return (
@@ -27,7 +88,7 @@ const Form = () => {
       </h2>
       <p className="text-lg text-center mt-5 mb-10">
           Add patients and {' '}
-          <span className="text-orange-700 font-bold">
+          <span className="text-green-800 font-bold">
           track them!
           </span>
           
@@ -35,6 +96,7 @@ const Form = () => {
       <form
         onSubmit={handleSubmit} 
         className="bg-white shadow-md rounded-lg py-10 px-5 mb-10">
+            {error && <Error msg="Todos los campos son obligatorios."/>}
           <div className="mb-5">
               <label htmlFor="patient" className="block text-gray-700 uppercase font-bold">Patient name</label>
               <input type="text"
@@ -85,8 +147,8 @@ const Form = () => {
               />   
           </div>
           <input type="submit" 
-          className="bg-orange-700 w-full p-3 text-white uppercase font-bold hover:bg-orange-900 cursor-pointer transition-all"
-          value="Add patient"
+          className="bg-green-800 w-full p-3 text-white uppercase font-bold cursor-pointer transition-all hover:bg-green-600 rounded-md"
+          value={ patient.id ? "Update patient" : "Add patient"}
           />
       </form>
     </div>
