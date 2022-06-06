@@ -1,5 +1,5 @@
 module.exports = {
-  content: ["./index.html","./src/**/*.jsx"], //removes everything I'm not using
+  content: ["index.html","./src/**/*.jsx"], //removes everything I'm not using
   theme: {
     extend: {},
   },
